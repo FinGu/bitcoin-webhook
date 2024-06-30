@@ -1,0 +1,13 @@
+[package]
+name = "bitcoin-webhook"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+axum = { version = "0.7.5", features = ["macros"] }
+bitcoincore-rpc = "0.19.0"
+dotenv = "0.15.0"
+reqwest = { version = "0.12.5", features = ["json"] }
+serde = "1.0.203"
+serde_json = "1.0.118"
+tokio = { version = "1.38.0", features = ["full"] }
