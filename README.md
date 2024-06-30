@@ -52,7 +52,7 @@ The webhook will be of the following syntax:<br/>
     "status":"Success"
 }
 ```
-For the example input to /create_and_wait_on:<br/>
+For the example input of
 ```json
 {
     "amount_in_btc": "0.00005",
@@ -60,3 +60,4 @@ For the example input to /create_and_wait_on:<br/>
     "expiry_in_mins": 1
 }
 ```
+to /create_and_wait_on
