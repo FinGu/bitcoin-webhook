@@ -8,7 +8,8 @@ Those transactions are scanned and filtered with the confirmation number specifi
 When a partial or successful payment happens, also when it's expired, the service sends a webhook to the link specified in the .env<br/>
 
 ### Pitfalls:
-Doesn't have cold storage, if the daemon exits, all the running tasks will be forever lost. ( You need a sort of db )
+Doesn't have cold storage, if the daemon exits, all the running tasks will be forever lost. ( You need a sort of db )<br/>
+Needs the confirmation number to be at least >= 1
 
 ### How to use:
 Install rust and set up a working bitcoind<br/>
