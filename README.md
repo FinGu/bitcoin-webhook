@@ -8,7 +8,8 @@ Those transactions are scanned and filtered with the confirmation number specifi
 When a partial or successful payment happens, also when it's expired, the service sends a webhook to the link specified in the .env<br/>
 
 ### Pitfalls:
-Doesn't have cold storage, if the daemon exits, all the running tasks will be forever lost. ( You need a sort of db )
+Doesn't have cold storage, if the daemon exits, all the running tasks will be forever lost. ( You need a sort of db )<br/>
+Needs the confirmation number to be at least >= 1
 
 ### How to use:
 Install rust and set up a working bitcoind<br/>
@@ -51,7 +52,7 @@ The webhook will be of the following syntax:<br/>
     "status":"Success"
 }
 ```
-For the example input to /create_and_wait_on:<br/>
+For the example input of
 ```json
 {
     "amount_in_btc": "0.00005",
@@ -59,3 +60,4 @@ For the example input to /create_and_wait_on:<br/>
     "expiry_in_mins": 1
 }
 ```
+to /create_and_wait_on
