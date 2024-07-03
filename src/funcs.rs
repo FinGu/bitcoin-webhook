@@ -8,7 +8,7 @@ use std::{
 };
 
 use bitcoincore_rpc::{
-    bitcoin::{Amount, SignedAmount},
+    bitcoin::{Amount, Denomination, SignedAmount},
     json::{ScanTxOutRequest, ScanTxOutResult, Utxo},
     Client, RpcApi,
 };
@@ -82,6 +82,20 @@ impl From<String> for Status {
     }
 }
 
+fn btc_amount_to_string<S>(amount: &Amount, serializer: S) -> Result<S::Ok, S::Error> 
+where S: serde::Serializer {
+    serializer.serialize_str(&amount.to_string_in(Denomination::Bitcoin))
+}
+
+fn btc_amount_to_string_opt<S>(amount: &Option<Amount>, serializer: S) -> Result<S::Ok, S::Error>
+where S: serde::Serializer,
+{
+    match amount {
+        Some(a) => serializer.serialize_some(&a.to_string_in(Denomination::Bitcoin)),
+        None => serializer.serialize_none(),
+    }
+}
+
 #[derive(Serialize)]
 pub struct Webhook {
     #[serde(skip_serializing)]
@@ -91,8 +105,12 @@ pub struct Webhook {
     pub status: Status,
     pub address: String,
 
+    #[serde(serialize_with = "btc_amount_to_string")]
     pub required_amount: Amount,
+
+    #[serde(serialize_with = "btc_amount_to_string_opt")]
     pub amount: Option<Amount>,
+
     pub required_confirmations_num: i32,
     pub confirmations_num: Option<i32>,
 }

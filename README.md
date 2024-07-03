@@ -3,9 +3,9 @@ Webhook like system ( a building block so to say ) to wait on a certain amount o
 
 ### How it works:
 For every request, it spawns a task that acts as a 'worker' for that certain address.<br/>
-It uses the bitcoin rpc's function scantxoutset to grab the transactions with at least one confirmation that were sent to the address specified.<br/>
+It uses the bitcoin rpc's function scantxoutset to grab the transactions with at least one confirmation that were sent to the address chosen.<br/>
 Those transactions are scanned and filtered with the confirmation number specified.<br/>
-When a partial or successful payment happens, also when it's expired, the service sends a webhook to the link specified in the .env<br/>
+When a partial or successful payment happens, also when it's expired, the service sends a webhook to the link in the .env<br/>
 
 ### Pitfalls:
 Doesn't have cold storage, if the daemon exits, all the running tasks will be forever lost. ( You need a sort of db )<br/>
@@ -43,13 +43,13 @@ The input:
 The webhook will be of the following syntax:<br/>
 ```json
 {
-    "address":"bcrt1qk2q65scedtnltrt0wqstzgjs20mx8778zefppv",
-    "amount":2000000000,
-    "confirmations_num":3,
-    "expiry":1719779785,
-    "required_amount":5000,
+    "address":"bcrt1qgeqygxev3hzvgh35x6ztd4z9vq390d5jg6stqr",
+    "amount":"0",
+    "confirmations_num":null,
+    "expiry":1720028507,
+    "required_amount":"0.00005",
     "required_confirmations_num":3,
-    "status":"Success"
+    "status":"Expired"
 }
 ```
 For the example input of
