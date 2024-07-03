@@ -55,27 +55,24 @@ pub async fn wait_on(
     let amount = Amount::from_str_in(&amount_in_btc, Denomination::Bitcoin)
         .map_err(|_| StatusCode::BAD_REQUEST)?;
 
-    let args = WaitOnParams {
-        address: addr,
-        amount,
-        confirmations_num,
-        timestamp: expiry_time,
-        status: None,
-    };
-
     if cfg!(debug_assertions) {
-        Address::from_str(&args.address)
+        Address::from_str(&addr)
             .map_err(|_| StatusCode::BAD_REQUEST)?
             .require_network(Network::Regtest)
             .map_err(|_| StatusCode::BAD_REQUEST)?;
     } else {
-        Address::from_str(&args.address)
+        Address::from_str(&addr)
             .map_err(|_| StatusCode::BAD_REQUEST)?
             .require_network(Network::Bitcoin)
             .map_err(|_| StatusCode::BAD_REQUEST)?;
     }
 
-    task::spawn(funcs::wait_on(Arc::clone(&service), args));
+    task::spawn(funcs::wait_on(Arc::clone(&service), WaitOnParams {
+        address: addr,
+        amount,
+        confirmations_num,
+        timestamp: expiry_time,
+    }));
 
     Ok(String::from("Being waited on"))
 }
@@ -105,15 +102,12 @@ pub async fn create_and_wait_on(
     let amount = Amount::from_str_in(&amount_in_btc, Denomination::Bitcoin)
         .map_err(|_| StatusCode::BAD_REQUEST)?;
 
-    let args = WaitOnParams {
+    task::spawn(funcs::wait_on(Arc::clone(&service), WaitOnParams {
         address: address.clone(),
         amount,
         confirmations_num,
         timestamp: expiry_time,
-        status: None,
-    };
-
-    task::spawn(funcs::wait_on(Arc::clone(&service), args));
+    }));
 
     Ok(address)
 }

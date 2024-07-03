@@ -61,7 +61,6 @@ pub struct WaitOnParams {
     pub amount: Amount,
     pub confirmations_num: i32,
     pub timestamp: u64,
-    pub status: Option<String>,
 }
 
 #[derive(Serialize, PartialEq, Eq, PartialOrd, Ord)]
@@ -177,7 +176,8 @@ pub fn scan_utxo_transactions(
         .map(|each| each.info.confirmations)
         .sum::<i32>();
 
-    confirms /= proper_transactions.len() as i32;
+    confirms /= proper_transactions.len() as i32;  // average of the confirms, doesn't really
+                                                   // matter
 
     (amnt, confirms)
 }
