@@ -9,7 +9,7 @@ use std::{
 
 use bitcoincore_rpc::{
     bitcoin::{Amount, Denomination, SignedAmount},
-    json::{ScanTxOutRequest, ScanTxOutResult, Utxo},
+    json::{ScanTxOutRequest, Utxo},
     Client, RpcApi,
 };
 
@@ -82,13 +82,16 @@ impl From<String> for Status {
     }
 }
 
-fn btc_amount_to_string<S>(amount: &Amount, serializer: S) -> Result<S::Ok, S::Error> 
-where S: serde::Serializer {
+fn btc_amount_to_string<S>(amount: &Amount, serializer: S) -> Result<S::Ok, S::Error>
+where
+    S: serde::Serializer,
+{
     serializer.serialize_str(&amount.to_string_in(Denomination::Bitcoin))
 }
 
 fn btc_amount_to_string_opt<S>(amount: &Option<Amount>, serializer: S) -> Result<S::Ok, S::Error>
-where S: serde::Serializer,
+where
+    S: serde::Serializer,
 {
     match amount {
         Some(a) => serializer.serialize_some(&a.to_string_in(Denomination::Bitcoin)),
@@ -141,13 +144,11 @@ impl Webhook {
         Ok(())
     }
 
-    pub async fn fill_and_send_partial(&mut self, response: &ScanTxOutResult) -> WebhookResult<()> {
-        self.amount = Some(response.total_amount);
+    pub async fn send_if_partial(&mut self, validated_amnt: &Amount) -> WebhookResult<()> {
+        let amnt = *validated_amnt;
 
-        if response.total_amount < self.required_amount {
-            if response.total_amount > Amount::from_int_btc(0)
-                && self.status != Status::PartialPayment
-            {
+        if amnt < self.required_amount {
+            if amnt > Amount::from_int_btc(0) && self.status != Status::PartialPayment {
                 self.status = Status::PartialPayment;
 
                 self.send().await?;
@@ -194,9 +195,8 @@ pub fn scan_utxo_transactions(
         .map(|each| each.info.confirmations)
         .sum::<i32>();
 
-    confirms /= proper_transactions.len() as i32;  // average of the confirms, doesn't really
-                                                   // matter
-
+    confirms /= proper_transactions.len() as i32; // average of the confirms, doesn't really
+                                                  // matter
     (amnt, confirms)
 }
 
@@ -218,17 +218,18 @@ pub async fn wait_on_handle_scan(
         Err(e) => return Err(WebhookError::Btc(e)),
     };
 
-    if webhook.fill_and_send_partial(&result).await.is_err() {
+    let (validated_amnt, avg_confirms) = scan_utxo_transactions(client, &result.unspents, webhook);
+
+    webhook.amount = Some(validated_amnt);
+    webhook.confirmations_num = Some(avg_confirms);
+
+    if webhook.send_if_partial(&validated_amnt).await.is_err() {
         //early return in case we didn't have transactions or it's partial
         return Ok(());
     }
 
-    let (amnt, confirms) = scan_utxo_transactions(client, &result.unspents, webhook);
-
-    if amnt >= webhook.required_amount {
+    if validated_amnt >= webhook.required_amount {
         webhook.status = Status::Success;
-        webhook.amount = Some(amnt);
-        webhook.confirmations_num = Some(confirms);
 
         return Err(WebhookError::Completed);
     }

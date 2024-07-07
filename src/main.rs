@@ -36,7 +36,7 @@ async fn main() {
         "WEBHOOK",
         "RPC_USER_PASS",
         "WAIT_TIME_SECS",
-        "PORT"
+        "PORT",
     ]);
 
     let [con_url, wallet, webhook, user_pass, wait_time_in_secs, port] =
@@ -71,7 +71,9 @@ async fn main() {
         .route("/test_webhook", post(routes::test_webhook))
         .with_state(service);
 
-    let listener = tokio::net::TcpListener::bind(&format!("0.0.0.0:{}", port)).await.unwrap();
+    let listener = tokio::net::TcpListener::bind(&format!("0.0.0.0:{}", port))
+        .await
+        .unwrap();
 
     axum::serve(listener, app).await.unwrap();
 }
